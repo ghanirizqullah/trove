@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Audio Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        #results {
+            margin-top: 30px;
+        }
+        .video-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff0000;
+            border-radius: 4px;
+        }
+        .video-item img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .video-item h3 {
+            margin: 10px 0 5px 0;
+            color: #333;
+        }
+        .video-item p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff0000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TROVE</h1>
+        <h4>Ask and you shall receive</h4>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="What do you desire...?">
+            <button onclick="search()">Search</button>
+        </div>
+        
+        <div id="error"></div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Function to search YouTube
+        function search() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            
+            // Clear previous results
+            errorDiv.innerHTML = '';
+            resultsDiv.innerHTML = '';
+            
+            // Validate input
+            if (!searchTerm.trim()) {
+                errorDiv.innerHTML = '<div class="error">Please enter a search term</div>';
+                return;
+            }
+            
+            // Show loading spinner
+            loadingDiv.style.display = 'block';
+            
+            // Send search request to Flask backend
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'search_term=' + encodeURIComponent(searchTerm)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                
+                if (data.error) {
+                    errorDiv.innerHTML = '<div class="error">' + data.error + '</div>';
+                    return;
+                }
+                
+                // Display results
+                data.results.forEach(video => {
+                    const videoHtml = `
+                        <div class="video-item">
+                            <img src="${video.thumbnail}" alt="${video.title}">
+                            <h3>${video.title}</h3>
+                            <p><strong>Channel:</strong> ${video.owner}</p>
+                            <p><strong>Verified:</strong> ${video.verification}</p>
+                            <button class="download-btn" onclick="downloadAudio('${video.link}')">Download Audio</button>
+                        </div>
+                    `;
+                    resultsDiv.innerHTML += videoHtml;
+                });
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                errorDiv.innerHTML = '<div class="error">Error: ' + error + '</div>';
+            });
+        }
+        
+        // Function to download audio
+        function downloadAudio(url) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = '';
+            
+            fetch('/api/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'url=' + encodeURIComponent(url)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errorDiv.innerHTML = '<div class="error">' + data.error + '</div>';
+                } else {
+                    errorDiv.innerHTML = '<div class="error" style="background-color: #e6ffe6; color: green;">✓ Download started! Check your downloads folder.</div>';
+                }
+            })
+            .catch(error => {
+                errorDiv.innerHTML = '<div class="error">Error: ' + error + '</div>';
+            });
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                search();
+            }
+        });
+    </script>
+</body>
+</html>

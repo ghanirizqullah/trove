@@ -12,5 +12,8 @@ wheels/
 # Download folder
 downloads/
 
+# Exploration folder
+exploration/
+
 # Personal Development Notes
 notes.md

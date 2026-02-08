@@ -1,13 +1,23 @@
-from pprint import pprint
+import requests
 import json
 
-file = 'initialdata.json'
 
-with open(file, 'r', encoding='utf-8') as f:
-    data = json.load(f)
+def yt_search(search_term):
+    search_url = 'https://www.youtube.com/results?search_query='
+
+    valid_url = search_url + "+".join(search_term.split())
+    response = requests.get(valid_url).text
+
+    start = (
+        response.index("ytInitialData")
+        + len("ytInitialData")
+        + 3
+    )
+    end = response.index("};", start) + 1
+    json_str = response[start:end]
+    data = json.loads(json_str)
 
     results = data['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents']
-    inititer = 0
     output_container = []
     for items in results:
         if "videoRenderer" in items:
@@ -19,9 +29,7 @@ with open(file, 'r', encoding='utf-8') as f:
                 output['verification'] = vids['ownerBadges'][0]['metadataBadgeRenderer']['style']
             else:
                 output['verification'] = 'N/A'
+            output['thumbnail'] = vids['thumbnail']['thumbnails'][0]['url']
             output['link'] = "https://www.youtube.com/watch?v=" + vids['videoId']
             output_container.append(output)
-        inititer += 1
-    print(inititer)
-    for i in output_container:
-        print(i, end='\n\n')
+    return output_container
