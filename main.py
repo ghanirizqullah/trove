@@ -2,17 +2,13 @@ import yt_dlp
 import os
 import requests
 import json
-import pprint
-
-# URLS = ['https://www.youtube.com/watch?v=Ej8RhiSv2-4']
-URLS = ['https://music.youtube.com/watch?v=Vj2VHNvkBPA']
-
 
 def download_audio(url, output_path = 'downloads'):
     os.makedirs(output_path, exist_ok=True)
     ydl_opts = {
         'format': 'm4a/bestaudio/best',
         'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s')
+        
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl: # pyright: ignore[reportArgumentType]
@@ -45,17 +41,19 @@ def yt_search(search_term):
                 output['verification'] = vids['ownerBadges'][0]['metadataBadgeRenderer']['style']
             else:
                 output['verification'] = 'N/A'
+            output['thumbnail'] = vids['thumbnail']['thumbnails'][0]['url']
             output['link'] = "https://www.youtube.com/watch?v=" + vids['videoId']
             output_container.append(output)
     for i in output_container:
         print(i, end='\n\n')
-
+    return output_container
 
 
 def main():
-    search = input()
-    yt_search(search)
-
+    search = input("What is it that you seek? ")
+    instance = yt_search(search)
+    download_audio(instance[0]['link'])
+    
 if __name__ == '__main__':
     main()
  
