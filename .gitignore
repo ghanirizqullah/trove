@@ -10,7 +10,7 @@ wheels/
 .venv
 
 # Download folder
-downloads/
+temp_downloads/
 
 # Exploration folder
 exploration/

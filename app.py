@@ -1,4 +1,4 @@
-from flask import  Flask, request, jsonify, render_template
+from flask import  Flask, request, jsonify, render_template, send_file
 from services import yt_search, yt_audio_download
 
 app = Flask(__name__)
@@ -28,10 +28,13 @@ def download():
         return jsonify({'error': 'URL required'}), 400
     
     try:
-        yt_audio_download(url)
-        return jsonify({'message': 'Download started'})
+        file_path = yt_audio_download(url)
+        if not file_path or file_path == "":
+            return jsonify({'error': 'Download failed - file not created'}), 500
+        return send_file(file_path, as_attachment=True)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
     
 if __name__ == '__main__':
     app.run(debug=True)
