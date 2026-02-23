@@ -175,7 +175,7 @@
                             <p><strong>Channel:</strong> ${video.owner}</p>
                             <p><strong>Verified:</strong> ${video.verification}</p>
                             <p><strong>Published:</strong> ${video.published}</p>
-                            <button class="download-btn" onclick="downloadAudio('${video.link}')">Download Audio</button>
+                            <button class="download-btn" onclick="downloadAudio(this, '${video.link}')">Download Audio</button>
                         </div>
                     `;
                     resultsDiv.innerHTML += videoHtml;
@@ -188,8 +188,14 @@
         }
         
         // Function to download audio
-        function downloadAudio(url) {
+        function downloadAudio(button, url) {
             const errorDiv = document.getElementById('error');
+            const originalText = button.textContent;
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            button.textContent = '⏳ Downloading...';
+            button.style.opacity = '0.6';
             errorDiv.innerHTML = '';
             
             fetch('/api/download', {
@@ -224,10 +230,32 @@
                 // Clean up the temporary URL
                 URL.revokeObjectURL(blobUrl);
                 
+                // Success state
+                button.textContent = '✓ Downloaded!';
+                button.style.backgroundColor = '#45a049';
                 errorDiv.innerHTML = '<div class="error" style="background-color: #e6ffe6; color: green;">✓ File downloaded! Check your Downloads folder.</div>';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    button.style.opacity = '1';
+                    button.style.backgroundColor = '';
+                }, 2000);
             })
             .catch(error => {
+                // Error state
+                button.textContent = '✗ Failed';
+                button.style.backgroundColor = '#ff6b6b';
                 errorDiv.innerHTML = '<div class="error">Error: ' + error + '</div>';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    button.style.opacity = '1';
+                    button.style.backgroundColor = '';
+                }, 2000);
             });
         }        
         // Allow Enter key to search
