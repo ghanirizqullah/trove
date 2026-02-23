@@ -170,9 +170,11 @@
                         <div class="video-item">
                             <img src="${video.thumbnail}" alt="${video.title}">
                             <h3>${video.title}</h3>
+                            <p><strong>Length:</strong> ${video.duration}</p>
                             <p><strong>Type:</strong> ${video.type}</p>
                             <p><strong>Channel:</strong> ${video.owner}</p>
                             <p><strong>Verified:</strong> ${video.verification}</p>
+                            <p><strong>Published:</strong> ${video.published}</p>
                             <button class="download-btn" onclick="downloadAudio('${video.link}')">Download Audio</button>
                         </div>
                     `;
@@ -197,19 +199,37 @@
                 },
                 body: 'url=' + encodeURIComponent(url)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    errorDiv.innerHTML = '<div class="error">' + data.error + '</div>';
-                } else {
-                    errorDiv.innerHTML = '<div class="error" style="background-color: #e6ffe6; color: green;">✓ Download started! Check your downloads folder.</div>';
+            .then(response => {
+                // Check if the response is OK (200-299 status)
+                if (!response.ok) {
+                    // If error, try to parse as JSON
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Download failed');
+                    });
                 }
+                // If OK, get the audio file as a blob
+                return response.blob();
+            })
+            .then(blob => {
+                // Create a temporary URL for the file
+                const blobUrl = URL.createObjectURL(blob);
+                // Create a fake link element
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = 'audio.m4a';  // Default filename
+                // Trigger the download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                // Clean up the temporary URL
+                URL.revokeObjectURL(blobUrl);
+                
+                errorDiv.innerHTML = '<div class="error" style="background-color: #e6ffe6; color: green;">✓ File downloaded! Check your Downloads folder.</div>';
             })
             .catch(error => {
                 errorDiv.innerHTML = '<div class="error">Error: ' + error + '</div>';
             });
-        }
-        
+        }        
         // Allow Enter key to search
         document.getElementById('searchInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
