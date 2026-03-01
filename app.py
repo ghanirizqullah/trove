@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, send_file
-from services import yt_search, yt_audio_download
+from services import yt_search, yt_audio_download, get_dwarven_reaction
 
 app = Flask(__name__)
 
@@ -15,8 +15,12 @@ def search():
         return jsonify({'error': 'Search term required'}), 400
     
     try:
+        agent_reaction = get_dwarven_reaction(search_term)
         results = yt_search(search_term)
-        return jsonify({'results': results})
+        return jsonify({
+            'agent_reaction': agent_reaction,
+            'results': results
+            })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

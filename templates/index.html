@@ -105,6 +105,21 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .agent-reaction {
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #FFD700;
+            font-style: italic;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .agent-reaction::before {
+            content: "👑 ";
+            font-style: normal;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +177,11 @@
                 if (data.error) {
                     errorDiv.innerHTML = '<div class="error">' + data.error + '</div>';
                     return;
+                }
+                
+                // Display agent reaction FIRST
+                if (data.agent_reaction) {
+                    resultsDiv.innerHTML = '<div class="agent-reaction">' + data.agent_reaction + '</div>';
                 }
                 
                 // Display results
