@@ -179,27 +179,37 @@
                     return;
                 }
                 
-                // Display agent reaction FIRST
-                if (data.agent_reaction) {
-                    resultsDiv.innerHTML = '<div class="agent-reaction">' + data.agent_reaction + '</div>';
+                // STAGE 1: Display initial reaction immediately
+                if (data.initial_reaction) {
+                    resultsDiv.innerHTML = '<div class="agent-reaction">' + data.initial_reaction + '</div>';
                 }
                 
-                // Display results
-                data.results.forEach(video => {
-                    const videoHtml = `
-                        <div class="video-item">
-                            <img src="${video.thumbnail}" alt="${video.title}">
-                            <h3>${video.title}</h3>
-                            <p><strong>Length:</strong> ${video.duration}</p>
-                            <p><strong>Type:</strong> ${video.type}</p>
-                            <p><strong>Channel:</strong> ${video.owner}</p>
-                            <p><strong>Verified:</strong> ${video.verification}</p>
-                            <p><strong>Published:</strong> ${video.published}</p>
-                            <button class="download-btn" onclick="downloadAudio(this, '${video.link}')">Download Audio</button>
-                        </div>
-                    `;
-                    resultsDiv.innerHTML += videoHtml;
-                });
+                // STAGE 2: After 1 second, replace with full agent reaction and results
+                setTimeout(() => {
+                    resultsDiv.innerHTML = '';
+                    
+                    // Display proper agent reaction
+                    if (data.agent_reaction) {
+                        resultsDiv.innerHTML = '<div class="agent-reaction">' + data.agent_reaction + '</div>';
+                    }
+                    
+                    // Display search results
+                    data.results.forEach(video => {
+                        const videoHtml = `
+                            <div class="video-item">
+                                <img src="${video.thumbnail}" alt="${video.title}">
+                                <h3>${video.title}</h3>
+                                <p><strong>Length:</strong> ${video.duration}</p>
+                                <p><strong>Type:</strong> ${video.type}</p>
+                                <p><strong>Channel:</strong> ${video.owner}</p>
+                                <p><strong>Verified:</strong> ${video.verification}</p>
+                                <p><strong>Published:</strong> ${video.published}</p>
+                                <button class="download-btn" onclick="downloadAudio(this, '${video.link}')">Download Audio</button>
+                            </div>
+                        `;
+                        resultsDiv.innerHTML += videoHtml;
+                    });
+                }, 1000);  // 1 second delay
             })
             .catch(error => {
                 loadingDiv.style.display = 'none';
