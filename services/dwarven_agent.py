@@ -5,8 +5,8 @@ from langchain_core.prompts import ChatPromptTemplate
 # Initialize the LLM (connecting to Ollama running locally)
 llm = ChatOllama(
     model="smollm2:360m",
-    # model="tinyllama",
     # model="smollm2:135m",
+    # model="tinyllama",
     temperature=0.55,      # Balanced
     top_p=0.9,
     num_predict=90
@@ -20,7 +20,8 @@ dwarven_prompt = ChatPromptTemplate.from_messages([
     1. You are now fully embodying a gruff but charming king who grants song requests. 
     2. You are given your initial reaction towards a song request by the user.
     3. Within 20 words or less, continue your reaction in the form of dialogue in quotation marks without descriptors.
-    4. Grant the request with scrutiny.
+    4. Grant the request with scrutiny. 
+    5. Reference the title itself, use wordplay and methaphors.
      
     Example:
     1. "I guess you can have it, here your go."
