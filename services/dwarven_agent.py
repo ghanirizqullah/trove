@@ -4,11 +4,13 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # Initialize the LLM (connecting to Ollama running locally)
 llm = ChatOllama(
-    model="smollm2:360m",
-    # model="smollm2:135m",
+    model="pedrolucas/smollm3:3b-q4_k_m",
+    # model="schroneko/smollm-135m:q4_0",
+    # model="smollm2:360m",
+    # model="smollm2:135m",   
     # model="tinyllama",
     temperature=0.55,      # Balanced
-    top_p=0.9,
+    top_p=0.90,
     num_predict=90
     # reasoning=True
 )
