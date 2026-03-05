@@ -73,37 +73,81 @@
         }
         .video-item {
             background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border: 3px solid black;
+            padding: 8px;
+            margin: 6px 0;
+            border: 2px solid black;
             border-radius: 0px;
-            box-shadow: 4px 4px 0px black;
+            box-shadow: 3px 3px 0px black;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
         }
+
         .video-item img {
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-            border-radius: 0px;
+            width: 140px;
+            height: 90px;
+            flex-shrink: 0;
+            object-fit: cover;
             border: 2px solid black;
             image-rendering: pixelated;
         }
-        .video-item h3 {
-            margin: 10px 0 5px 0;
-            color: #333;
+
+        .video-meta {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+            position: relative;
         }
-        .video-item p {
-            margin: 5px 0;
-            color: #666;
-            font-size: 14px;
+
+        .video-title {
+            font-size: 8px;
+            color: #111;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-details {
+            font-size: 7px;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .verified-tick {
+            color: #1a8a1a;
+            font-weight: bold;
         }
         .download-btn {
-            background-color: #4CAF50;
-            padding: 8px 15px;
-            font-size: 14px;
-            margin-top: 10px;
+            background-color: #2d6b30;
+            padding: 4px 8px;
+            font-size: 7px;
+            margin-top: auto;
+            align-self: flex-end;
         }
         .download-btn:hover {
-            background-color: #45a049;
+            background-color: #1e4d20;
+        }
+        .not-quite-btn {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            background-color: #1a1a1a;
+            color: #aaa;
+            font-size: 8px;
+            padding: 8px;
+            border: 2px dashed #555;
+            box-shadow: none;
+        }
+        .not-quite-btn:hover {
+            background-color: #333;
+            color: white;
+            box-shadow: none;
+            transform: none;
         }
         .error {
             color: red;
@@ -141,18 +185,29 @@
             font-size: 12px;
             box-shadow: 4px 4px 0px black;
         }
-        .agent-reaction::before {
-            content: "DWARVEN KING: ";
-            font-style: normal;
-            color: #fff;
+
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 4px;
+            margin-bottom: 4px;
         }
 
-        /* THE SCENE */
+        h4 {
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+            margin-top: 0;
+        }
+
+        /* === SCENE === */
         .scene {
             position: relative;
-            height: 200px;
-            margin: 30px 0 20px 0;
-            overflow: hidden;
+            width: 100%;
+            min-height:800px;
+            background-color: #f0f0f0;
+            margin-top: 20px;
         }
 
         .ground {
@@ -167,20 +222,14 @@
         .character {
             position: absolute;
             bottom: 3px;
-            width: 48px;
-            height: 48px;
             background-color: #555;
             border: 2px solid black;
         }
 
         .hero {
             left: 30px;
-        }
-
-        .king {
-            width: 56px;
-            height: 64px;
-            background-color: #8B4513;
+            width: 48px;
+            height: 48px;
         }
 
         .throne {
@@ -188,39 +237,205 @@
             bottom: 3px;
             right: 20px;
             width: 90px;
-            height: 100px;
+            height: 120px;
             border: 3px solid black;
             background-color: #3a2a14;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 0;
         }
 
-        .speech-bubble {
+        .king {
+            width: 56px;
+            height: 64px;
+            background-color: #8B4513;
+            border: 2px solid black;
+        }
+
+        .dialogue-area {
             position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            border: 3px solid black;
-            padding: 12px 16px;
+            top: 15px;
+            bottom: 450px;
+            left: 100px;
+            right: 130px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 8px;
+            scrollbar-width: none;
+        }
+
+        .dialogue-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .idle-text {
             font-size: 10px;
-            max-width: 300px;
+            color: #888;
             text-align: center;
+            margin: auto;
         }
 
-        .speech-bubble::after {
-            content: "";
+        .dialogue-entry {
+            flex-shrink: 0;
+            animation: entryFadeIn 0.4s ease;
+            transition: opacity 0.6s ease;
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dialogue-entry.from-king {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .dialogue-entry.from-hero {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+
+
+        .dialogue-entry.faded {
+            opacity: 0.35;
+        }
+
+        @keyframes entryFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-bubble {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 10px 14px;
+            font-size: 10px;
+            display: inline-block;
+        }
+
+        .hero-bubble.not-quite {
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .hero-bubble.not-quite:hover {
+            transform: translateY(3px);
+        }
+
+        /* === STAGE CARDS === */
+        #stage-cards {
             position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 12px solid black;
+            bottom: 50px;
+            left: 110px;
+            right: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 16px;
+            pointer-events: none;
+        }
+
+        .stage-card-wrap {
+            pointer-events: all;
+            flex: 1;
+            max-width: 185px;
+            transition: opacity 0.4s;
+        }
+
+        .stage-card-wrap:nth-child(1) { margin-bottom: 50px; }
+        .stage-card-wrap:nth-child(2) { margin-bottom: 0px; }
+        .stage-card-wrap:nth-child(3) { margin-bottom: 25px; }
+
+        .stage-card {
+            background: white;
+            border: 2px solid black;
+            box-shadow: 3px 3px 0 black;
+            padding: 5px;
+            animation: bob 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        .stage-card-wrap:nth-child(1) .stage-card { animation-delay: 0s; }
+        .stage-card-wrap:nth-child(2) .stage-card { animation-delay: 0.5s; }
+        .stage-card-wrap:nth-child(3) .stage-card { animation-delay: 1s; }
+
+        .stage-card img {
+            width: 100%;
+            height: 75px;
+            object-fit: cover;
+            border: 1px solid black;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .stage-card-title {
+            font-size: 7px;
+            color: #111;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .stage-card-meta {
+            font-size: 6px;
+            color: #666;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stage-card .download-btn {
+            display: block;
+            width: 100%;
+            margin-top: 4px;
+            text-align: center;
+            box-shadow: 2px 2px 0 #555;
+        }
+
+        /* === EXPANDED CARD === */
+        .stage-card-wrap.expanded {
+            position: relative;
+            z-index: 10;
+        }
+
+        .stage-card-wrap.expanded .stage-card {
+            animation: none;
+            border-color: #FFD700;
+            box-shadow: 4px 4px 0 black;
+        }
+
+        .stage-card-wrap.expanded .stage-card img {
+            height: 115px;
+        }
+
+        .stage-card-wrap.expanded .stage-card-title {
+            white-space: normal;
+            font-size: 8px;
+            line-height: 1.5;
+        }
+
+        .stage-card-wrap.expanded .stage-card-meta {
+            white-space: normal;
+            font-size: 7px;
+            line-height: 1.5;
+        }
+
+        #stage-cards.has-expanded .stage-card-wrap:not(.expanded) {
+            opacity: 0.35;
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
@@ -239,89 +454,190 @@
             <div class="spinner"></div>
             <p>Loading...</p>
         </div>
+    </div>
 
-        <!-- THE SCENE -->
-        <div class="scene">
-            <div class="character hero"></div>
-            <div class="speech-bubble" id="agentSpeech">Awaiting your request...</div>
-            <div class="throne">
-                <div class="character king"></div>
-            </div>
-            <div class="ground"></div>
+    <div class="scene">
+        <div class="character hero"></div>
+        <div class="dialogue-area" id="results"></div>
+        <div id="stage-cards"></div>
+        <div class="throne">
+            <div class="character king"></div>
         </div>
-
-        <div id="results"></div>
+        <div class="ground"></div>
     </div>
 
     <script>
+        let allResults = [];  // Store full result list
+        let shownCount = 0;   // How many results have been shown so far
+
+        const TYPEWRITER_RATE = 25; // ms per character — lower is faster
+
+        function typewrite(el, text, rate = TYPEWRITER_RATE, onDone = null) {
+            el.textContent = '';
+            let i = 0;
+            function tick() {
+                if (i < text.length) {
+                    el.textContent += text[i++];
+                    setTimeout(tick, rate);
+                } else if (onDone) {
+                    onDone();
+                }
+            }
+            tick();
+        }
+
+        function addDialogueEntry(cls, html, onDone = null) {
+            const resultsDiv = document.getElementById('results');
+            // Only fade same-side entries — king and hero are independent
+            if (cls.includes('from-king')) {
+                resultsDiv.querySelectorAll('.dialogue-entry.from-king:not(.faded)').forEach(el => el.classList.add('faded'));
+            } else {
+                resultsDiv.querySelectorAll('.dialogue-entry.from-hero:not(.faded)').forEach(el => el.classList.add('faded'));
+            }
+            const entry = document.createElement('div');
+            entry.className = 'dialogue-entry ' + cls;
+            entry.innerHTML = html;
+            resultsDiv.appendChild(entry);
+            resultsDiv.scrollTop = entry.offsetTop;
+            // Typewrite the bubble text
+            const bubble = entry.querySelector('.agent-reaction, .hero-bubble');
+            if (bubble) {
+                const text = bubble.textContent;
+                typewrite(bubble, text, TYPEWRITER_RATE, onDone);
+            } else if (onDone) {
+                onDone();
+            }
+        }
+
+        function toggleCard(wrap) {
+            const stageDiv = document.getElementById('stage-cards');
+            const isExpanded = wrap.classList.contains('expanded');
+            stageDiv.querySelectorAll('.stage-card-wrap.expanded').forEach(el => el.classList.remove('expanded'));
+            stageDiv.classList.remove('has-expanded');
+            if (!isExpanded) {
+                wrap.classList.add('expanded');
+                stageDiv.classList.add('has-expanded');
+            }
+        }
+
+        function buildStageCardHtml(video) {
+            const isVerified = video.verification === 'BADGE_STYLE_TYPE_VERIFIED' || video.verification === 'BADGE_STYLE_TYPE_VERIFIED_ARTIST';
+            const tick = isVerified ? ' ✔' : '';
+            return `
+                <div class="stage-card" onclick="toggleCard(this.closest('.stage-card-wrap'))">
+                    <img src="${video.thumbnail}" alt="${video.title}">
+                    <div class="stage-card-title">${video.title}</div>
+                    <div class="stage-card-meta">${video.duration} · ${video.owner}${tick}</div>
+                    <button class="download-btn" onclick="event.stopPropagation(); downloadAudio(this, '${video.link}')">&#8595; Audio</button>
+                </div>
+            `;
+        }
+
+        function appendResults(videos) {
+            const stageDiv = document.getElementById('stage-cards');
+
+            // Fade out existing stage cards, then replace
+            const existing = stageDiv.querySelectorAll('.stage-card-wrap');
+            existing.forEach(el => { el.style.opacity = '0'; });
+            setTimeout(() => {
+                stageDiv.innerHTML = '';
+                videos.forEach(video => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'stage-card-wrap';
+                    wrap.innerHTML = buildStageCardHtml(video);
+                    stageDiv.appendChild(wrap);
+                });
+            }, existing.length > 0 ? 400 : 0);
+        }
+
+        function loadMore(btn) {
+            // Make the clicked bubble static (non-interactive)
+            if (btn) {
+                btn.onclick = null;
+                btn.classList.remove('not-quite');
+                btn.style.cursor = 'default';
+            }
+
+            // King responds — load next batch only after king finishes typing
+            addDialogueEntry('from-king', '<div class="agent-reaction">How about this?</div>', () => {
+                const nextBatch = allResults.slice(shownCount, shownCount + 3);
+                shownCount += nextBatch.length;
+                appendResults(nextBatch);
+                if (shownCount < allResults.length) {
+                    addDialogueEntry('from-hero', '<div class="hero-bubble not-quite" onclick="loadMore(this)">Hmm, not quite.</div>');
+                }
+            });
+        }
+
+        const INITIAL_REACTIONS = [
+            t => `"${t}", eh?`,
+            t => `"${t}" you say?`,
+            t => `"${t}"... interesting...`,
+            t => `I see... It has been awhile since "${t}" was sought.`
+        ];
+
         // Function to search YouTube
         function search() {
-            const searchTerm = document.getElementById('searchInput').value;
+            const searchTerm = document.getElementById('searchInput').value.trim();
             const errorDiv = document.getElementById('error');
-            const resultsDiv = document.getElementById('results');
             const loadingDiv = document.getElementById('loading');
-            
-            // Clear previous results
+
+            // Clear everything on new search
             errorDiv.innerHTML = '';
-            resultsDiv.innerHTML = '';
-            
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('stage-cards').innerHTML = '';
+
             // Validate input
-            if (!searchTerm.trim()) {
+            if (!searchTerm) {
                 errorDiv.innerHTML = '<div class="error">Please enter a search term</div>';
                 return;
             }
-            
-            // Show loading spinner
-            loadingDiv.style.display = 'block';
-            
-            // Send search request to Flask backend
+
+            // Show initial reaction immediately (client-side, no wait)
+            let typewriterDone = false;
+            let fetchData = null;
+            const initialText = INITIAL_REACTIONS[Math.floor(Math.random() * INITIAL_REACTIONS.length)](searchTerm);
+            addDialogueEntry('from-king', '<div class="agent-reaction">' + initialText + '</div>', () => {
+                typewriterDone = true;
+                tryProceed();
+            });
+
+            function tryProceed() {
+                if (!typewriterDone || !fetchData) return;
+                loadingDiv.style.display = 'none';
+
+                allResults = fetchData.results || [];
+                shownCount = 0;
+                const firstBatch = allResults.slice(0, 3);
+                shownCount = firstBatch.length;
+
+                if (fetchData.agent_reaction) {
+                    addDialogueEntry('from-king', '<div class="agent-reaction">' + fetchData.agent_reaction + '</div>', () => {
+                        appendResults(firstBatch);
+                        if (shownCount < allResults.length) {
+                            addDialogueEntry('from-hero', '<div class="hero-bubble not-quite" onclick="loadMore(this)">Hmm, not quite.</div>');
+                        }
+                    });
+                } else {
+                    appendResults(firstBatch);
+                }
+            }
+
+            // Fire search request in parallel with the typewriter
             fetch('/api/search', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'search_term=' + encodeURIComponent(searchTerm)
             })
             .then(response => response.json())
             .then(data => {
-                loadingDiv.style.display = 'none';
-                
                 if (data.error) {
+                    loadingDiv.style.display = 'none';
                     errorDiv.innerHTML = '<div class="error">' + data.error + '</div>';
                     return;
                 }
-                
-                // STAGE 1: Display initial reaction immediately
-                if (data.initial_reaction) {
-                    resultsDiv.innerHTML = '<div class="agent-reaction">' + data.initial_reaction + '</div>';
-                }
-                
-                // STAGE 2: After 1 second, replace with full agent reaction and results
-                setTimeout(() => {
-                    resultsDiv.innerHTML = '';
-                    
-                    // Display proper agent reaction
-                    if (data.agent_reaction) {
-                        resultsDiv.innerHTML = '<div class="agent-reaction">' + data.agent_reaction + '</div>';
-                    }
-                    
-                    // Display search results
-                    data.results.forEach(video => {
-                        const videoHtml = `
-                            <div class="video-item">
-                                <img src="${video.thumbnail}" alt="${video.title}">
-                                <h3>${video.title}</h3>
-                                <p><strong>Length:</strong> ${video.duration}</p>
-                                <p><strong>Type:</strong> ${video.type}</p>
-                                <p><strong>Channel:</strong> ${video.owner}</p>
-                                <p><strong>Verified:</strong> ${video.verification}</p>
-                                <p><strong>Published:</strong> ${video.published}</p>
-                                <button class="download-btn" onclick="downloadAudio(this, '${video.link}')">Download Audio</button>
-                            </div>
-                        `;
-                        resultsDiv.innerHTML += videoHtml;
-                    });
-                }, 1000);  // 1 second delay
+                fetchData = data;
+                tryProceed();
             })
             .catch(error => {
                 loadingDiv.style.display = 'none';

@@ -23,26 +23,31 @@ def yt_search(search_term):
         if "videoRenderer" in items:
             output = {}
             vids = items.get("videoRenderer", {})
-            if 'icon' in vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']:
-                output['title'] = vids['title']['runs'][0]['text']
-                if 'runs' in vids['ownerText']:
-                    output['owner'] = vids['ownerText']['runs'][0]['text']
-                else:
-                    output['owner'] = 'N/A'
+            try:
                 if 'icon' in vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']:
+                    output['title'] = vids['title']['runs'][0]['text']
+                    if 'runs' in vids['ownerText']:
+                        output['owner'] = vids['ownerText']['runs'][0]['text']
+                    else:
+                        output['owner'] = 'N/A'
+                    if 'icon' in vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']:
+                        output['type'] = vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']['icon']['iconType']
+                    else: 
+                        output['icon'] = 'N/A'
+                    if 'ownerBadges' in vids:
+                        output['verification'] = vids['ownerBadges'][0]['metadataBadgeRenderer']['style']
+                    else:
+                        output['verification'] = 'N/A'
+                    output['duration'] = vids['lengthText']['simpleText']
+                    if 'publishedTimeText' in vids:
+                        output['published'] = vids['publishedTimeText']['simpleText']
+                    else:
+                        output['published'] = 'N/A'
+                    output['thumbnail'] = vids['thumbnail']['thumbnails'][0]['url']
+                    output['link'] = "https://www.youtube.com/watch?v=" + vids['videoId']
                     output['type'] = vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']['icon']['iconType']
-                if 'ownerBadges' in vids:
-                    output['verification'] = vids['ownerBadges'][0]['metadataBadgeRenderer']['style']
-                else:
-                    output['verification'] = 'N/A'
-                output['duration'] = vids['lengthText']['simpleText']
-                if 'publishedTimeText' in vids:
-                    output['published'] = vids['publishedTimeText']['simpleText']
-                else:
-                    output['published'] = 'N/A'
-                output['thumbnail'] = vids['thumbnail']['thumbnails'][0]['url']
-                output['link'] = "https://www.youtube.com/watch?v=" + vids['videoId']
-                output['type'] = vids['thumbnailOverlays'][0]['thumbnailOverlayTimeStatusRenderer']['icon']['iconType']
-                output_container.append(output)
+                    output_container.append(output)
+            except:
+                continue
     return output_container
 
