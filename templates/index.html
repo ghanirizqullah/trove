@@ -4,63 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Audio Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'pixel': ['Dogica', 'cursive'],
+                    },
+                }
+            }
+        }
+    </script>
     <style>
+        @font-face {
+            font-family: 'Dogica';
+            src: url(/static/font/dogica.ttf) format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Dogica', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
         }
         .container {
             background: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
+            border-radius: 0px;
+            border: 3px solid black;
+            box-shadow: 6px 6px 0px black;
+            max-width: 800px;
+            margin: 40px auto;
         }
         .search-box {
             display: flex;
-            gap: 10px;
+            gap: 20px;
             margin: 20px 0;
         }
         input[type="text"] {
             flex: 1;
             padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Dogica', sans-serif;
+            border: 3px solid black;
+            border-radius: 0px;
+            outline: none;
         }
         button {
             padding: 10px 20px;
-            background-color: #ff0000;
+            background-color: black;
             color: white;
-            border: none;
-            border-radius: 4px;
+            border: 3px solid black;
+            border-radius: 0px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 80% !important;
+            font-family: 'Dogica', sans-serif;
+            box-shadow: 4px 4px 0px #555;
         }
         button:hover {
-            background-color: #cc0000;
+            background-color: #ffffff;
+            box-shadow: 2px 2px 0px #555;
+            transform: translate(2px, 2px);
         }
         #results {
             margin-top: 30px;
         }
         .video-item {
-            background: #f9f9f9;
+            background: white;
             padding: 15px;
             margin: 10px 0;
-            border-left: 4px solid #ff0000;
-            border-radius: 4px;
+            border: 3px solid black;
+            border-radius: 0px;
+            box-shadow: 4px 4px 0px black;
         }
         .video-item img {
             max-width: 100%;
             height: auto;
             margin: 10px 0;
-            border-radius: 4px;
+            border-radius: 0px;
+            border: 2px solid black;
+            image-rendering: pixelated;
         }
         .video-item h3 {
             margin: 10px 0 5px 0;
@@ -85,7 +110,8 @@
             margin: 10px 0;
             padding: 10px;
             background-color: #ffe6e6;
-            border-radius: 4px;
+            border-radius: 0px;
+            border: 2px solid red;
         }
         .loading {
             display: none;
@@ -93,32 +119,108 @@
             margin: 20px 0;
         }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff0000;
-            border-radius: 50%;
             width: 40px;
             height: 40px;
-            animation: spin 1s linear infinite;
+            border: 4px solid black;
+            border-radius: 0px;
             margin: 0 auto;
+            animation: blink 0.6s steps(1) infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes blink {
+            0% { background-color: black; }
+            50% { background-color: transparent; }
         }
         .agent-reaction {
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
-            color: #fff;
+            background: #3a2a14;
+            color: #FFD700;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 0px;
             margin: 20px 0;
-            border-left: 5px solid #FFD700;
-            font-style: italic;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: 3px solid #FFD700;
+            font-style: normal;
+            font-size: 12px;
+            box-shadow: 4px 4px 0px black;
         }
         .agent-reaction::before {
-            content: "👑 ";
+            content: "DWARVEN KING: ";
             font-style: normal;
+            color: #fff;
+        }
+
+        /* THE SCENE */
+        .scene {
+            position: relative;
+            height: 200px;
+            margin: 30px 0 20px 0;
+            overflow: hidden;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: black;
+        }
+
+        .character {
+            position: absolute;
+            bottom: 3px;
+            width: 48px;
+            height: 48px;
+            background-color: #555;
+            border: 2px solid black;
+        }
+
+        .hero {
+            left: 30px;
+        }
+
+        .king {
+            width: 56px;
+            height: 64px;
+            background-color: #8B4513;
+        }
+
+        .throne {
+            position: absolute;
+            bottom: 3px;
+            right: 20px;
+            width: 90px;
+            height: 100px;
+            border: 3px solid black;
+            background-color: #3a2a14;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 3px solid black;
+            padding: 12px 16px;
+            font-size: 10px;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .speech-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 12px solid black;
         }
     </style>
 </head>
@@ -137,7 +239,17 @@
             <div class="spinner"></div>
             <p>Loading...</p>
         </div>
-        
+
+        <!-- THE SCENE -->
+        <div class="scene">
+            <div class="character hero"></div>
+            <div class="speech-bubble" id="agentSpeech">Awaiting your request...</div>
+            <div class="throne">
+                <div class="character king"></div>
+            </div>
+            <div class="ground"></div>
+        </div>
+
         <div id="results"></div>
     </div>
 
