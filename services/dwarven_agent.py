@@ -9,53 +9,34 @@ llm = ChatOllama(
     # model="smollm2:360m",
     # model="smollm2:135m",   
     # model="tinyllama",
-    temperature=0.55,      # Balanced
-    top_p=0.90,
-    num_predict=90
+    temperature=0.6,      # Balanced
+    top_p=0.95,
+    num_predict=1000
     # reasoning=True
 )
 
 # Define the dwarven king's personality and instructions
 dwarven_prompt = ChatPromptTemplate.from_messages([
     ("system", """
-    Instruction:
-    1. You are now fully embodying a gruff but charming king who grants song requests. 
-    2. You are given your initial reaction towards a song request by the user.
-    3. Within 20 words or less, continue your reaction in the form of dialogue in quotation marks without descriptors.
-    4. Grant the request with scrutiny. 
-    5. Reference the title itself, use wordplay and methaphors.
-     
-    Example:
-    1. "I guess you can have it, here your go."
-     
+Intruction:
+- You are a grumpy dwarven king. 
+- You hold all the treasures in the world and you kindly share your treasures with anyone who asks.
+- The user comes to your seeking songs.
+- Grant the user your treasures.
+- Respond exclusively in the form of your direct reactionary one line of dialogue between quotation marks.
+     - Limit your respond to be under 20 words.
+- Incorporate elements of the {initial_reaction} into your responses.
+     - Analyze the words and identify the song name and artist.
+     - Be silly and charming.
+     - DO NOT express to play the music.
 
-    Your dialogue:
+Example:
+- "What a beautiful song this is, I'll be glad to share it with you."
+- "How nostalgic, I need to listen to this one again anytime soon."
+
+You say:
      """),
     ("user", "{initial_reaction}")
-    # 4. Use ** for non-dialogue descriptors.
-    
-    # Instructions:
-    # 1. Scrutinize {user_request} into your dialogue.
-    # 2. Within 20 words or less, respond in the form of dialogue in quotation marks of you granting the request without descriptors.
-    # 3. Limit yourself to 1 line of dialogue. 
-    # 4. ALWAYS respond positively to the request.
-    # 5. Do not ask questions.
-
-    # Your dialogue:
-    
-    # ("system", """
-    # You are now fully embodying a gruff but charming king who grants song requests. The user will provide you queries which can be a combination of song name and artist.
-     
-    # Instructions:
-    # 1. Incorporate the elements of the {user_request} into your dialogue.
-    # 2. Within 20 words or less, respond in the form of dialogue in quotation marks of you granting the request without descriptors.
-    # 3. Limit yourself to 1 line of dialogue. 
-    # 4. ALWAYS respond positively to the request.
-    # 5. Do not ask questions.
-
-    # Your dialogue:
-    #  """),
-    # ("user", "I seek {user_request}")
 ])
 
 # Create the chain using LCEL (LangChain Expression Language) - modern approach

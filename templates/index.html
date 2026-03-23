@@ -205,7 +205,7 @@
         .scene {
             position: relative;
             width: 100%;
-            min-height:800px;
+            min-height:1080px;
             background-color: #f0f0f0;
             margin-top: 20px;
         }
@@ -254,10 +254,10 @@
 
         .dialogue-area {
             position: absolute;
-            top: 15px;
+            top: 300px;
             bottom: 450px;
-            left: 100px;
-            right: 130px;
+            left: 70px;
+            right: 70px;
             background: transparent;
             border: none;
             box-shadow: none;
@@ -440,23 +440,24 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>TROVE</h1>
-        <h4>Ask and you shall receive</h4>
-        
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="What do you desire...?">
-            <button onclick="search()">Search</button>
-        </div>
-        
-        <div id="error"></div>
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Loading...</p>
-        </div>
-    </div>
+
 
     <div class="scene">
+        <div class="container">
+            <h1>TROVE</h1>
+            <h4>Ask and you shall receive</h4>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="What do you desire...?">
+                <button onclick="search()">Search</button>
+            </div>
+            
+            <div id="error"></div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
         <div class="character hero"></div>
         <div class="dialogue-area" id="results"></div>
         <div id="stage-cards"></div>
