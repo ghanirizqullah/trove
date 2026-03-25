@@ -328,6 +328,32 @@
             transform: translateY(3px);
         }
 
+        .hero-bubble.go-back {
+            cursor: pointer;
+            border-color: #888;
+            opacity: 0.7;
+            transition: all 0.1s;
+        }
+
+        .hero-bubble.go-back:hover {
+            transform: translateY(3px);
+            opacity: 1;
+        }
+
+        .hero-bubble.final-choice {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            font-weight: bold;
+            border-color: #FF0000;
+            border-width: 3px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            animation: glow 1s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+
         /* === STAGE CARDS === */
         #stage-cards {
             position: absolute;
@@ -437,6 +463,96 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
+
+        /* === THOUGHT BUBBLE === */
+        .thought-bubble {
+            position: absolute;
+            bottom: 120px;
+            left: 25px;
+            width: 200px;
+            background: white;
+            border: 3px solid black;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 3px 3px 0px black;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 15;
+            pointer-events: auto;
+        }
+
+        .thought-bubble.active {
+            display: flex;
+        }
+
+        /* Pointer tail pointing down to hero */
+        .thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 0px solid transparent;
+            border-top: 12px solid black;
+        }
+
+        .thought-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 16px;
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 0px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        /* Thought bubble dots */
+        .thought-bubble .dot {
+            position: absolute;
+            background: black;
+            border: 2px solid black;
+            border-radius: 50%;
+        }
+
+        .thought-bubble .dot-1 {
+            width: 8px;
+            height: 8px;
+            bottom: -22px;
+            left: 8px;
+        }
+
+        .thought-bubble .dot-2 {
+            width: 6px;
+            height: 6px;
+            bottom: -30px;
+            left: 2px;
+        }
+
+        /* User action buttons in thought bubble */
+        .thought-bubble .user-action {
+            background: #f5f5f5;
+            color: black;
+            border: 2px solid black;
+            padding: 8px 10px;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-align: center;
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .thought-bubble .user-action:hover {
+            background: white;
+            transform: scale(1.05);
+            box-shadow: 2px 2px 0px black;
+        }
     </style>
 </head>
 <body>
@@ -459,6 +575,7 @@
             </div>
         </div>
         <div class="character hero"></div>
+        <div class="thought-bubble" id="user-actions"></div>
         <div class="dialogue-area" id="results"></div>
         <div id="stage-cards"></div>
         <div class="throne">
@@ -468,9 +585,6 @@
     </div>
 
     <script>
-        let allResults = [];  // Store full result list
-        let shownCount = 0;   // How many results have been shown so far
-
         const TYPEWRITER_RATE = 25; // ms per character — lower is faster
 
         function typewrite(el, text, rate = TYPEWRITER_RATE, onDone = null) {
@@ -551,23 +665,160 @@
             }, existing.length > 0 ? 400 : 0);
         }
 
-        function loadMore(btn) {
-            // Make the clicked bubble static (non-interactive)
-            if (btn) {
-                btn.onclick = null;
-                btn.classList.remove('not-quite');
-                btn.style.cursor = 'default';
+        let allResults = [];
+        let shownCount = 0;
+        let currentPage = 0;
+        let totalPages = 0;
+        let frustrationLevel = 1;
+
+        // Helper function to populate thought bubble with user action buttons
+        function updateThoughtBubble(options) {
+            const bubble = document.getElementById('user-actions');
+            bubble.innerHTML = '';
+            
+            if (!options || options.length === 0) {
+                bubble.classList.remove('active');
+                return;
             }
 
-            // King responds — load next batch only after king finishes typing
-            addDialogueEntry('from-king', '<div class="agent-reaction">How about this?</div>', () => {
-                const nextBatch = allResults.slice(shownCount, shownCount + 3);
-                shownCount += nextBatch.length;
-                appendResults(nextBatch);
-                if (shownCount < allResults.length) {
-                    addDialogueEntry('from-hero', '<div class="hero-bubble not-quite" onclick="loadMore(this)">Hmm, not quite.</div>');
-                }
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'user-action ' + (option.class || '');
+                btn.textContent = option.text;
+                btn.onclick = option.onclick;
+                bubble.appendChild(btn);
             });
+
+
+            bubble.classList.add('active');
+        }
+
+        // Helper function to clear thought bubble
+        function clearThoughtBubble() {
+            const bubble = document.getElementById('user-actions');
+            bubble.innerHTML = '';
+            bubble.classList.remove('active');
+        }
+
+        function loadMore(btn) {
+            // Clear thought bubble first
+            clearThoughtBubble();
+            
+            // Pick a random flavourful dialogue and show it
+            const heroDialogue = getRandomDialogue(NEXT_PAGE_DIALOGUES);
+            addDialogueEntry('from-hero', '<div class="hero-bubble not-quite">' + heroDialogue + '</div>');
+
+            // Call backend to get next page (tracks frustration escalation)
+            fetch('/api/next-page', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error loading more:', data.error);
+                    return;
+                }
+
+                // King responds with escalating frustration
+                addDialogueEntry('from-king', '<div class="agent-reaction">' + data.agent_reaction + '</div>', () => {
+                    appendResults(data.results);
+                    currentPage = data.current_page;
+                    totalPages = data.total_pages;
+                    frustrationLevel = data.frustration_level;
+                    
+                    // Add options based on current state
+                    if (data.is_final_recommendation) {
+                        // King made the decision
+                        updateThoughtBubble([
+                            {
+                                text: '⭐ THE KING\'S CHOICE ⭐',
+                                class: 'final-choice',
+                                onclick: () => { clearThoughtBubble(); }
+                            }
+                        ]);
+                    } else if (currentPage < totalPages - 1) {
+                        // More pages available
+                        updateThoughtBubble([
+                            {
+                                text: 'Next Page',
+                                class: 'not-quite',
+                                onclick: () => loadMore()
+                            },
+                            {
+                                text: 'Previous Page',
+                                class: 'go-back',
+                                onclick: () => goBack()
+                            }
+                        ]);
+                    } else {
+                        // Last page - king will force recommendation on next "not quite"
+                        const options = [
+                            {
+                                text: 'Next Page',
+                                class: 'not-quite',
+                                onclick: () => loadMore()
+                            }
+                        ];
+                        if (currentPage > 0) {
+                            options.push({
+                                text: 'Previous Page',
+                                class: 'go-back',
+                                onclick: () => goBack()
+                            });
+                        }
+                        updateThoughtBubble(options);
+                    }
+                });
+            })
+            .catch(error => console.error('Fetch error:', error));
+        }
+
+        function goBack(btn) {
+            // Clear thought bubble first
+            clearThoughtBubble();
+            
+            // Pick a random flavourful dialogue and show it
+            const heroDialogue = getRandomDialogue(PREVIOUS_PAGE_DIALOGUES);
+            addDialogueEntry('from-hero', '<div class="hero-bubble go-back">' + heroDialogue + '</div>');
+
+            // Call backend to get previous page
+            fetch('/api/prev-page', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error going back:', data.error);
+                    return;
+                }
+
+                // King's sarcastic response about going back
+                addDialogueEntry('from-king', '<div class="agent-reaction">' + data.agent_reaction + '</div>', () => {
+                    appendResults(data.results);
+                    currentPage = data.current_page;
+                    frustrationLevel = data.frustration_level;
+                    
+                    // Re-add dialogue options
+                    const options = [
+                        {
+                            text: 'Next Page',
+                            class: 'not-quite',
+                            onclick: () => loadMore()
+                        }
+                    ];
+                    if (currentPage > 0) {
+                        options.push({
+                            text: 'Previous Page',
+                            class: 'go-back',
+                            onclick: () => goBack()
+                        });
+                    }
+                    updateThoughtBubble(options);
+                });
+            })
+            .catch(error => console.error('Fetch error:', error));
         }
 
         const INITIAL_REACTIONS = [
@@ -576,6 +827,59 @@
             t => `"${t}"... interesting...`,
             t => `I see... It has been awhile since "${t}" was sought.`
         ];
+
+        // Dialogue variations for "Next Page" navigation
+        const NEXT_PAGE_DIALOGUES = [
+            "Hmm, not quite.",
+            "These don't impress me.",
+            "I've seen better.",
+            "Nay, not what I seek.",
+            "Pah! Show me more!",
+            "These won't do.",
+            "Not to my taste.",
+            "Keep them coming.",
+            "I'm not convinced.",
+            "Show me thy next offerings.",
+            "Bah! What else ye got?",
+            "These are... mediocre.",
+            "Not the treasure I need.",
+            "Try again, ye merchant!",
+            "These lack... something.",
+            "I demand better!",
+            "Nope, not it.",
+            "Got anything better?",
+            "These bore me.",
+            "Show me what comes next."
+        ];
+
+        // Dialogue variations for "Previous Page" navigation
+        const PREVIOUS_PAGE_DIALOGUES = [
+            "Actually, let me go back.",
+            "Wait, let me reconsider.",
+            "Hmm, perhaps I was hasty.",
+            "No, turn back.",
+            "Hold on... let me look again.",
+            "Nay, I changed my mind.",
+            "Back we go!",
+            "Let me see those again.",
+            "Perhaps I was too quick to judge.",
+            "No, no... show me the previous ones.",
+            "Wait! Go back!",
+            "I think I missed something.",
+            "Bring back what we had.",
+            "Hmm, second thoughts.",
+            "Let me reconsider those.",
+            "Actually, those were better.",
+            "No wait, the others were finer.",
+            "Blast! Back a page!",
+            "I regret my haste.",
+            "Show me what came before."
+        ];
+
+        // Helper function to get random dialogue
+        function getRandomDialogue(dialogues) {
+            return dialogues[Math.floor(Math.random() * dialogues.length)];
+        }
 
         // Function to search YouTube
         function search() {
@@ -587,6 +891,7 @@
             errorDiv.innerHTML = '';
             document.getElementById('results').innerHTML = '';
             document.getElementById('stage-cards').innerHTML = '';
+            clearThoughtBubble();
 
             // Validate input
             if (!searchTerm) {
@@ -607,20 +912,38 @@
                 if (!typewriterDone || !fetchData) return;
                 loadingDiv.style.display = 'none';
 
-                allResults = fetchData.results || [];
-                shownCount = 0;
-                const firstBatch = allResults.slice(0, 3);
-                shownCount = firstBatch.length;
+                const results = fetchData.results || [];
+                appendResults(results);
+                
+                // Store pagination state
+                currentPage = fetchData.current_page || 0;
+                totalPages = fetchData.total_pages || 1;
+                frustrationLevel = fetchData.frustration_level || 1;
 
                 if (fetchData.agent_reaction) {
                     addDialogueEntry('from-king', '<div class="agent-reaction">' + fetchData.agent_reaction + '</div>', () => {
-                        appendResults(firstBatch);
-                        if (shownCount < allResults.length) {
-                            addDialogueEntry('from-hero', '<div class="hero-bubble not-quite" onclick="loadMore(this)">Hmm, not quite.</div>');
+                        // Show dialogue options in thought bubble only
+                        if (totalPages > 1) {
+                            updateThoughtBubble([
+                                {
+                                    text: 'Next Page',
+                                    class: 'not-quite',
+                                    onclick: () => loadMore()
+                                }
+                            ]);
                         }
                     });
                 } else {
-                    appendResults(firstBatch);
+                    // No reaction, just show options
+                    if (totalPages > 1) {
+                        updateThoughtBubble([
+                            {
+                                text: 'Next Page',
+                                class: 'not-quite',
+                                onclick: () => loadMore()
+                            }
+                        ]);
+                    }
                 }
             }
 
